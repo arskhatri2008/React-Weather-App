@@ -9,6 +9,7 @@ const Home = () => {
 
   useEffect(() => {
     setIsLoading(true)
+    const controller = new AbortController();
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(async(location) => {
         console.log("location", location);
@@ -16,11 +17,14 @@ const Home = () => {
             let apiKey = "1eb2b0718446fe54a6718bc2ed5f4a03"
             const response = await axios.get(
             `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${apiKey}&units=metric`
+            ,{
+              signal: controller.signal
+           }
           );
 
           console.log(response.data);
           setWeatherData([response.data, ...weatherData]);
-          isLoading(false)
+          setIsLoading(false)
         } catch (error) {
           console.log(error);
           setIsLoading(false)
@@ -29,6 +33,12 @@ const Home = () => {
     } else {
       console.log("Geolocation is not supported by this browser.");
     }
+
+    return () => {
+      //cleanup function
+      controller.abort()
+    }
+
   }, []);
 
   const submitHandler = async (e) => {
@@ -48,6 +58,7 @@ const Home = () => {
       setIsLoading(false)
     } catch (error) {
       console.log(error);
+      setIsLoading(false)
     }
   };
 
@@ -69,13 +80,15 @@ const Home = () => {
       </form>
       <hr />
       {isLoading ? <div>Loading...</div> : null}
+      {!weatherData ? <div>No Data</div> : null}
 
       {weatherData.length ? (
-        weatherData.map((eachWeatherDAta, index) => {
-          return <WeatherCard key={index} weatherData={eachWeatherDAta} />;
+        weatherData.map((eachWeatherData, index) => {
+          return <WeatherCard key={index} weatherData={eachWeatherData} />;
         })
       ) : (
-        <div>No Data</div>
+        // <div>No Data</div>
+        null
       )}
     </div>
   );
