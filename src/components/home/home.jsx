@@ -1,11 +1,12 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-import WeatherCard from "../weatherWidget/weatherWidget";
+// import WeatherCard from "../weatherWidget/weatherWidget";
 
 const Home = () => {
   const [weatherData, setWeatherData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const cityNameRef = useRef(null);
+  const postTitleInputRef = useRef(null);
+  const postBodyInputRef = useRef(null);
 
   useEffect(() => {
     setIsLoading(true)
@@ -46,15 +47,15 @@ const Home = () => {
     // not recommended below method for get input value
     // let cityName = document.querySelector('#cityName').value
     let apiKey = "1eb2b0718446fe54a6718bc2ed5f4a03";
-    console.log("cityName: ", cityNameRef.current.value);
+    // console.log("cityName: ", cityNameRef.current.value);
     try {
         setIsLoading(true)
-        const response = await axios.get(
-            `https://api.openweathermap.org/data/2.5/weather?q=${cityNameRef.current.value}&appid=${apiKey}&units=metric`
-        );
+        // const response = await axios.get(
+        //     `https://api.openweathermap.org/data/2.5/weather?q=${cityNameRef.current.value}&appid=${apiKey}&units=metric`
+        // );
 
-      console.log(response.data);
-      setWeatherData([response.data, ...weatherData]);
+      // console.log(response.data);
+      // setWeatherData([response.data, ...weatherData]);
       setIsLoading(false)
     } catch (error) {
       console.log(error);
@@ -65,31 +66,30 @@ const Home = () => {
   return (
     <div>
       <form onSubmit={submitHandler}>
-        <label htmlFor="cityName">City Name: </label>
+        <label htmlFor="postTitleInput">Post Title: </label>
         <input
           type="text"
           name=""
-          id="cityName"
+          id="postTitleInput"
           required
           minLength={2}
           maxLength={20}
-          ref={cityNameRef}
+          ref={postTitleInputRef}
         ></input>
         <br />
-        <button type="submit">Get Weather</button>
+        <label htmlFor="postBodyInput">Post Body: </label>
+        <textarea
+          type="re"
+          name=""
+          id="postBodyInput"
+          required
+          minLength={2}
+          maxLength={20}
+          ref={postBodyInputRef}
+        ></textarea>
+        <button type="submit">Publish Post</button>
       </form>
       <hr />
-      {isLoading ? <div>Loading...</div> : null}
-      {!weatherData ? <div>No Data</div> : null}
-
-      {weatherData.length ? (
-        weatherData.map((eachWeatherData, index) => {
-          return <WeatherCard key={index} weatherData={eachWeatherData} />;
-        })
-      ) : (
-        // <div>No Data</div>
-        null
-      )}
     </div>
   );
 };
