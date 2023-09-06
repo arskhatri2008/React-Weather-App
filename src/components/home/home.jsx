@@ -1,16 +1,14 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
-// import WeatherCard from "../weatherWidget/weatherWidget";
+import WeatherCard from "../weatherWidget/weatherWidget";
 
 const Home = () => {
   const [weatherData, setWeatherData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const postTitleInputRef = useRef(null);
-  const postBodyInputRef = useRef(null);
+  const cityNameRef = useRef(null);
 
   useEffect(() => {
     setIsLoading(true)
-    const controller = new AbortController();
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(async(location) => {
         console.log("location", location);
@@ -18,14 +16,11 @@ const Home = () => {
             let apiKey = "1eb2b0718446fe54a6718bc2ed5f4a03"
             const response = await axios.get(
             `https://api.openweathermap.org/data/2.5/weather?lat=${location.coords.latitude}&lon=${location.coords.longitude}&appid=${apiKey}&units=metric`
-            ,{
-              signal: controller.signal
-           }
           );
 
           console.log(response.data);
           setWeatherData([response.data, ...weatherData]);
-          setIsLoading(false)
+          isLoading(false)
         } catch (error) {
           console.log(error);
           setIsLoading(false)
@@ -34,12 +29,6 @@ const Home = () => {
     } else {
       console.log("Geolocation is not supported by this browser.");
     }
-
-    return () => {
-      //cleanup function
-      controller.abort()
-    }
-
   }, []);
 
   const submitHandler = async (e) => {
@@ -47,49 +36,47 @@ const Home = () => {
     // not recommended below method for get input value
     // let cityName = document.querySelector('#cityName').value
     let apiKey = "1eb2b0718446fe54a6718bc2ed5f4a03";
-    // console.log("cityName: ", cityNameRef.current.value);
+    console.log("cityName: ", cityNameRef.current.value);
     try {
         setIsLoading(true)
-        // const response = await axios.get(
-        //     `https://api.openweathermap.org/data/2.5/weather?q=${cityNameRef.current.value}&appid=${apiKey}&units=metric`
-        // );
+        const response = await axios.get(
+            `https://api.openweathermap.org/data/2.5/weather?q=${cityNameRef.current.value}&appid=${apiKey}&units=metric`
+        );
 
-      // console.log(response.data);
-      // setWeatherData([response.data, ...weatherData]);
+      console.log(response.data);
+      setWeatherData([response.data, ...weatherData]);
       setIsLoading(false)
     } catch (error) {
       console.log(error);
-      setIsLoading(false)
     }
   };
 
   return (
     <div>
       <form onSubmit={submitHandler}>
-        <label htmlFor="postTitleInput">Post Title: </label>
+        <label htmlFor="cityName">City Name: </label>
         <input
           type="text"
           name=""
-          id="postTitleInput"
+          id="cityName"
           required
           minLength={2}
           maxLength={20}
-          ref={postTitleInputRef}
+          ref={cityNameRef}
         ></input>
         <br />
-        <label htmlFor="postBodyInput">Post Body: </label>
-        <textarea
-          type="re"
-          name=""
-          id="postBodyInput"
-          required
-          minLength={2}
-          maxLength={20}
-          ref={postBodyInputRef}
-        ></textarea>
-        <button type="submit">Publish Post</button>
+        <button type="submit">Get Weather</button>
       </form>
       <hr />
+      {isLoading ? <div>Loading...</div> : null}
+
+      {weatherData.length ? (
+        weatherData.map((eachWeatherDAta, index) => {
+          return <WeatherCard key={index} weatherData={eachWeatherDAta} />;
+        })
+      ) : (
+        <div>No Data</div>
+      )}
     </div>
   );
 };
